@@ -19,7 +19,8 @@
 	"customizations": {
     	"vscode": {
         	"settings": {
-               "workbench.colorTheme": "Tokyo Night"
+               "workbench.colorTheme": "Tokyo Night",
+			   "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python"
             },
             "extensions": [
             	"ms-toolsai.jupyter",
@@ -37,7 +38,7 @@
 	"workspaceFolder": "/workspace",
 
 	// Create virtual environment and install dependencies
-    "onCreateCommand": "uv venv && uv pip install -e .[dev]",
+    "postCreateCommand": "uv venv && uv pip install -e .[dev]",
     
     // Set up environment for the virtual environment
     "remoteEnv": {
