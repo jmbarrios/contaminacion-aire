@@ -37,7 +37,7 @@
 	"workspaceFolder": "/workspace",
 
 	// Create virtual environment and install dependencies
-    "postCreateCommand": "uv venv && uv pip install -e .[dev]",
+    "onCreateCommand": "uv venv && uv pip install -e .[dev]",
     
     // Set up environment for the virtual environment
     "remoteEnv": {
