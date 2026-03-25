@@ -1,6 +1,21 @@
 import pandas as pd
 
 
+def detect_sensor_failure(sensor_data: pd.Series) -> float:
+   """ Regresa el porcentaje de valores nulos en la serie
+  
+   Esta función sirve para poder detectar si algún sensor está presentando fallas
+   de acuerdo a que tantos valores nulos está produciendo.
+
+   Args:
+       sensor_data (Series): Serie de mediciones de un sensor
+
+   Returns:
+       (float64) porcentaje de valores nulos en la muestra
+   """
+
+   return (sensor_data.isnull().sum()/len(sensor_data) * 100).round(2)
+
 def get_quality_report(df: pd.DataFrame) -> pd.DataFrame:
     """ obtiene un reporte de calidad de informacion de dataframe
 
