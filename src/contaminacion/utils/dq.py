@@ -30,7 +30,7 @@ def get_quality_report(df: pd.DataFrame) -> pd.DataFrame:
     Args:
         df (DataFrame): DataFrame para evaluar su calidad
 
-    Return:
+    Returns:
         (DataFrame) DataFrame con el reporte de calidad
     """
     report = pd.DataFrame({
