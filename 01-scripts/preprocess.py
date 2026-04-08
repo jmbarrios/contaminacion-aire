@@ -39,19 +39,19 @@ def main() -> None:
 
     grouped_by_station_data = data.groupby("id_station")
 
-    sensor_status: pd.DataFrame = (
-        grouped_by_station_data[['O3', 'NO2', 'SO2', 'CO', 'PM10', 'PM2.5']]
-        .aggregate(dq.detect_sensor_failure)
-    )
-    print(sensor_status)
+    # sensor_status: pd.DataFrame = (
+    #     grouped_by_station_data[['O3', 'NO2', 'SO2', 'CO', 'PM10', 'PM2.5']]
+    #     .aggregate(dq.detect_sensor_failure)
+    # )
+    # print(sensor_status)
 
-    # for id_station, sdf in grouped_by_station_data:
-    #     dq_path = data_quality_reports_path/f"quality_2025_station_{id_station}.csv"
-    #     log.info(f"Saving {dq_path} file ...")
-    #     dq.get_quality_report(sdf).to_csv(dq_path, index=False)
-    #     data_fp = interim_data_path/f"data_2025_station_{id_station}.csv"
-    #     log.info(f"Saving {data_fp} file ...")
-    #     sdf.to_csv(data_fp, index=False)
+    for id_station, sdf in grouped_by_station_data:
+        dq_path = data_quality_reports_path/f"quality_2025_station_{id_station}.csv"
+        log.info(f"Saving {dq_path} file ...")
+        dq.get_quality_report(sdf).to_csv(dq_path, index=False)
+        data_fp = interim_data_path/f"data_2025_station_{id_station}.parquet"
+        log.info(f"Saving {data_fp} file ...")
+        sdf.to_parquet(data_fp, index=False)
 
 if __name__ == "__main__":
     main()

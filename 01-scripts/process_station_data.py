@@ -3,34 +3,57 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from contaminacion.utils import aggregations
+from contaminacion.utils import aggregations, logger
 
+log = logger.get_logger(__name__)
 
-def main():
-    interim_data_path: Path = Path("00-data/interim")
-    interim_data_path.mkdir(exist_ok=True, parents=True)
+def process_station(file: Path, output_path: Path) -> None:
+    """Procesa los datos horarios de una estación y guarda el agregado diario.
+    Lee un archivo parquet con mediciones horarias, aplica las agregaciones
+    diarias definidas por la norma y escribe el resultado en ``output_path``.
+    Args:
+        file: Ruta al archivo parquet de la estación. El nombre del archivo
+            debe seguir el patrón ``data_YYYY_station_{id_station}.parquet``.
+        output_path: Directorio donde se guardará el archivo parquet con los
+            datos diarios agregados.
+    """
+    station_id = file.stem.split("_")[-1]
 
-    test_station = "AJM"
-    test_data_file: Path = (
-        interim_data_path
-        /f'data_2025_station_{test_station}.parquet'
-    )
-    data = pd.read_parquet(test_data_file)
-    data = data.set_index('date')
+    log.info(f"Processing station: {station_id}")
+
+    data = pd.read_parquet(file).set_index("date")
 
     daily_data = (
         data
-        .resample('D')
+        .resample("D")
         .agg(
-            O3 = ("O3", lambda s: aggregations.agg_compliance(s, np.max)),
-            NO2 = ("NO2", lambda s: aggregations.agg_compliance(s, np.max)),
-            SO2 = ("SO2", lambda s: aggregations.agg_compliance(s, np.max)),
-            PM10 = ("PM10", lambda s: aggregations.agg_compliance(s, np.mean)),
+            O3   = ("O3",    lambda s: aggregations.agg_compliance(s, np.max)),
+            NO2  = ("NO2",   lambda s: aggregations.agg_compliance(s, np.max)),
+            SO2  = ("SO2",   lambda s: aggregations.agg_compliance(s, np.max)),
+            PM10 = ("PM10",  lambda s: aggregations.agg_compliance(s, np.mean)),
             PM25 = ("PM2.5", lambda s: aggregations.agg_compliance(s, np.mean)),
-            CO = ("CO", aggregations.daily_co_indicator)
+            CO   = ("CO",    aggregations.daily_co_indicator),
         )
     )
-    print(daily_data.head(15))
+
+    output_file = output_path / f"daily_2025_{station_id}.parquet"
+    daily_data.to_parquet(output_file)
+    log.info(f"Saved {len(daily_data)} daily records → {output_file}")
+
+
+def main()->None:
+    interim_data_path: Path = Path("00-data/interim")
+
+    station_files = list(interim_data_path.glob("data_2025_station_*.parquet"))
+
+    if not station_files:
+        log.info(f"No station files found in {interim_data_path}")
+        return
+
+    log.info(f"Found {len(station_files)} station(s) to process")
+
+    for file in sorted(station_files):
+        process_station(file, interim_data_path)
 
 if __name__ == '__main__':
     main()
